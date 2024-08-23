@@ -104,6 +104,7 @@ const addTodo = async () => {
 
 // 變更 TODO 狀態：(完成 / 待完成)
 const toggleStatus = async (id) => {
+
     await axios.patch(
         `${api_site}/todos/${id}/toggle`,
         {},
@@ -130,25 +131,30 @@ const deleteTodo = async (id) => {
 
 // 刪除 Cookie 的函數（登出時使用）
 function deleteCookie(name) {
-    document.cookie = name + '=; Max-Age=-99999999;'
+    document.cookie = name + '=; Max-Age=0; path=/;'; // 嘗試使用根路徑
+    document.cookie = name + '=; Max-Age=0; path=/2024-vue-todolist/;'; // 保留 path 不設 domain
+    document.cookie = name + '=; Max-Age=0;'; // 只使用 Max-Age 和 path
 }
+
 
 //登出並刪除 cookie[authToken] & localStorage[nickname]
 const singOut = async () => {
     try {
-        await axios.post(
+        const token = getCookie('authToken')
+        console.log(token)
+        const response = await axios.post(
             `${api_site}/users/sign_out`,
             {},
             {
                 headers: {
-                    Authorization: token.value
+                    Authorization: token
                 }
             }
         )
         deleteCookie('authToken')
         localStorage.removeItem('nickname');
-        token.value = ''
-        router.replace('/home')
+        console.log(response)
+        router.push('/home')
     } catch (error) {
         console.log(error)
     }
